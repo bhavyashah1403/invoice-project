@@ -2,5 +2,5 @@ Flask
 flask-cors
 gunicorn
 boto3
-fillpdf==0.9.4
+fillpdf==0.7.3
 python-dotenv
