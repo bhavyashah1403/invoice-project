@@ -13,7 +13,7 @@ export default function App() {
     setLoading(true);
     setResult(null);
 
-    const res = await fetch("http://localhost:5000/api/generate-invoice", {
+    const res = await fetch("https://invoice-project-muxg.onrender.com", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form)
