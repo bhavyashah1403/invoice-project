@@ -1,10 +1,12 @@
 import os
 import datetime
 import boto3
+import threading
 from fillpdf import fillpdfs
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+
 
 class InvoiceGenerator:
     def __init__(self, template_file):
@@ -24,6 +26,7 @@ class InvoiceGenerator:
         fields = list(fillpdfs.get_form_fields(self.template_file).keys())
         filename = f"{data['customer_name']}_{datetime.date.today()}.pdf"
 
+        # Fill PDF
         fillpdfs.write_fillable_pdf(self.template_file, filename, {
             fields[0]: data['number'],
             fields[1]: datetime.date.today().strftime('%Y-%m-%d'),
@@ -35,9 +38,17 @@ class InvoiceGenerator:
             fields[7]: data['amount_in_digit']
         })
 
+        # Upload to S3
         link = self.upload_to_s3(filename, data['customer_name'])
-        self.send_email(link, data['customer_name'], data['email'])
 
+        # 🔥 SEND EMAIL ASYNC (NON-BLOCKING)
+        threading.Thread(
+            target=self.send_email,
+            args=(link, data['customer_name'], data['email']),
+            daemon=True
+        ).start()
+
+        # ✅ RETURN IMMEDIATELY
         return link
 
     def upload_to_s3(self, file_path, customer):
@@ -53,25 +64,30 @@ class InvoiceGenerator:
         return self.s3.generate_presigned_url(
             "get_object",
             Params={"Bucket": self.S3_BUCKET, "Key": key},
-            ExpiresIn=604800
+            ExpiresIn=604800  # 7 days
         )
 
     def send_email(self, link, name, email):
-        msg = MIMEMultipart()
-        msg["From"] = os.getenv("EMAIL_USER")
-        msg["To"] = email
-        msg["Subject"] = "Your Invoice"
+        try:
+            msg = MIMEMultipart()
+            msg["From"] = os.getenv("EMAIL_USER")
+            msg["To"] = email
+            msg["Subject"] = "Your Invoice"
 
-        msg.attach(MIMEText(
-            f"Hello {name},\n\nYour invoice:\n{link}\n\nExpires in 7 days.",
-            "plain"
-        ))
+            msg.attach(MIMEText(
+                f"Hello {name},\n\nYour invoice:\n{link}\n\nExpires in 7 days.",
+                "plain"
+            ))
 
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
-        server.login(
-            os.getenv("EMAIL_USER"),
-            os.getenv("EMAIL_PASS")
-        )
-        server.send_message(msg)
-        server.quit()
+            server = smtplib.SMTP("smtp.gmail.com", 587)
+            server.starttls()
+            server.login(
+                os.getenv("EMAIL_USER"),
+                os.getenv("EMAIL_PASS")
+            )
+            server.send_message(msg)
+            server.quit()
+
+        except Exception as e:
+            # Log but DO NOT crash API
+            print("Email sending failed:", e)
