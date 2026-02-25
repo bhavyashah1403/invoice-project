@@ -1,0 +1,14 @@
+# Environment variables
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Node / React
+node_modules/
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db

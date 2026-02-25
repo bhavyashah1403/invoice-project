@@ -1,0 +1,11 @@
+body {
+  background: #f5f7fb;
+}
+.form-control,
+.input-group-text {
+  border-radius: 10px;
+}
+
+.btn {
+  border-radius: 12px;
+}
