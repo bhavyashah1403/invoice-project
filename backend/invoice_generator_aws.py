@@ -23,36 +23,43 @@ class InvoiceGenerator:
         )
 
     def generate_invoice(self, data):
+        # 🔑 ALWAYS write to /tmp on Render
+        safe_name = data["customer_name"].replace(" ", "_")
+        filename = f"/tmp/{safe_name}_{datetime.date.today()}.pdf"
+
+        # Read PDF form fields
         fields = list(fillpdfs.get_form_fields(self.template_file).keys())
-        filename = f"{data['customer_name']}_{datetime.date.today()}.pdf"
 
         # Fill PDF
-        fillpdfs.write_fillable_pdf(self.template_file, filename, {
-            fields[0]: data['number'],
-            fields[1]: datetime.date.today().strftime('%Y-%m-%d'),
-            fields[2]: data['customer_name'],
-            fields[3]: data['amount'],
-            fields[4]: data['mode_of_payment'],
-            fields[5]: data['purpose'],
-            fields[6]: data['bank_name'],
-            fields[7]: data['amount_in_digit']
-        })
+        fillpdfs.write_fillable_pdf(
+            self.template_file,
+            filename,
+            {
+                fields[0]: data["number"],
+                fields[1]: datetime.date.today().strftime("%Y-%m-%d"),
+                fields[2]: data["customer_name"],
+                fields[3]: data["amount"],
+                fields[4]: data["mode_of_payment"],
+                fields[5]: data["purpose"],
+                fields[6]: data["bank_name"],
+                fields[7]: data["amount_in_digit"],
+            }
+        )
 
         # Upload to S3
-        link = self.upload_to_s3(filename, data['customer_name'])
+        link = self.upload_to_s3(filename, safe_name)
 
-        # 🔥 SEND EMAIL ASYNC (NON-BLOCKING)
+        # 🔥 Send email asynchronously (DO NOT BLOCK API)
         threading.Thread(
             target=self.send_email,
-            args=(link, data['customer_name'], data['email']),
+            args=(link, data["customer_name"], data["email"]),
             daemon=True
         ).start()
 
-        # ✅ RETURN IMMEDIATELY
         return link
 
     def upload_to_s3(self, file_path, customer):
-        key = f"invoices/{customer}/{file_path}"
+        key = f"invoices/{customer}/{os.path.basename(file_path)}"
 
         self.s3.upload_file(
             file_path,
@@ -64,7 +71,7 @@ class InvoiceGenerator:
         return self.s3.generate_presigned_url(
             "get_object",
             Params={"Bucket": self.S3_BUCKET, "Key": key},
-            ExpiresIn=604800  # 7 days
+            ExpiresIn=60 * 60 * 24 * 7  # 7 days
         )
 
     def send_email(self, link, name, email):
@@ -75,7 +82,15 @@ class InvoiceGenerator:
             msg["Subject"] = "Your Invoice"
 
             msg.attach(MIMEText(
-                f"Hello {name},\n\nYour invoice:\n{link}\n\nExpires in 7 days.",
+                f"""Hello {name},
+
+Your invoice is ready:
+{link}
+
+This link will expire in 7 days.
+
+Thank you.
+""",
                 "plain"
             ))
 
@@ -89,5 +104,5 @@ class InvoiceGenerator:
             server.quit()
 
         except Exception as e:
-            # Log but DO NOT crash API
+            # Never crash the API because of email
             print("Email sending failed:", e)
