@@ -13,11 +13,16 @@ export default function App() {
     setLoading(true);
     setResult(null);
 
-    const res = await fetch("https://invoice-project-muxg.onrender.com", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form)
-    });
+    const res = await fetch(
+  "https://invoice-project-muxg.onrender.com/api/generate-invoice",
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(form),
+  }
+);
+
+
 
     setResult(await res.json());
     setLoading(false);
