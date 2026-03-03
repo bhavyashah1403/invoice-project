@@ -4,6 +4,10 @@
   box-sizing: border-box;
 }
 
+html {
+  font-size: 16px;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 50%, #dfe7ef 100%);
@@ -11,22 +15,26 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
+  -webkit-text-size-adjust: 100%;
 }
 
 #root {
   width: 100%;
   height: 100%;
+  display: flex;
 }
 
 /* App Container */
 .app-container {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
   padding: 20px;
+  width: 100%;
 }
 
 .background-blur {
@@ -252,6 +260,21 @@ body {
 }
 
 /* Form Grid */
+.form-section {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.form-section.active {
+  display: block;
+  opacity: 1;
+}
+
+.form-section.hidden {
+  display: none;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -489,10 +512,11 @@ body {
   color: #3b82f6;
 }
 
-/* Responsive */
+/* Responsive - Tablet */
 @media (max-width: 768px) {
   .app-container {
-    padding: 16px;
+    padding: 12px;
+    min-height: 100vh;
   }
 
   .app-content {
@@ -500,26 +524,27 @@ body {
   }
 
   .card-wrapper {
-    gap: 20px;
+    gap: 24px;
   }
 
   .header {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
   }
 
   .icon-badge {
-    width: 64px;
-    height: 64px;
-    margin: 0 auto 16px;
-    font-size: 32px;
-  }
-
-  .header h1 {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 20px;
     font-size: 36px;
   }
 
+  .header h1 {
+    font-size: 40px;
+    margin-bottom: 10px;
+  }
+
   .header p {
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .main-card {
@@ -527,192 +552,437 @@ body {
   }
 
   .tabs {
-    padding: 16px;
-    gap: 8px;
+    padding: 18px;
+    gap: 10px;
   }
 
   .tab-button {
-    padding: 12px 16px;
-    font-size: 14px;
+    padding: 14px 18px;
+    font-size: 15px;
+    border-radius: 14px;
   }
 
   .form-container {
-    padding: 24px;
+    padding: 28px;
   }
 
   .form-section {
-    gap: 20px;
+    gap: 24px;
   }
 
   .form-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 20px;
   }
+
+  .form-group {
+    gap: 10px;
+  }
+
+.form-group label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.error-text {
+  color: #ef4444;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.error-input {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+
+.error-input:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
 
   .form-group.full-width {
     grid-column: 1;
   }
 
+  .input-wrapper input {
+    padding: 14px 14px 14px 42px;
+    font-size: 16px;
+    border-radius: 12px;
+  }
+
+  .input-wrapper i {
+    left: 12px;
+    font-size: 16px;
+  }
+
   .submit-button {
-    padding: 12px 20px;
-    font-size: 15px;
+    padding: 16px 24px;
+    font-size: 17px;
+    border-radius: 14px;
+    gap: 10px;
+  }
+
+  .submit-button i {
+    font-size: 18px;
   }
 
   .success-message,
   .error-message {
-    padding: 20px;
+    padding: 24px;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
+    border-radius: 16px;
   }
 
   .message-icon {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
   }
 
   .success-message h3,
   .error-message h3 {
-    font-size: 16px;
+    font-size: 18px;
   }
 
   .success-message p,
   .error-message p {
-    font-size: 13px;
+    font-size: 14px;
+  }
+
+  .download-btn {
+    padding: 12px 20px;
+    font-size: 15px;
+    border-radius: 12px;
+    gap: 8px;
   }
 
   .footer {
     padding: 16px;
-    font-size: 13px;
-  }
-
-  .section-header {
-    padding-bottom: 16px;
-  }
-
-  .section-icon {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-  }
-
-  .section-header h3 {
-    font-size: 18px;
-  }
-
-  .section-header p {
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .app-container {
-    padding: 12px;
-    min-height: auto;
-  }
-
-  .card-wrapper {
-    gap: 16px;
-  }
-
-  .icon-badge {
-    width: 56px;
-    height: 56px;
-    font-size: 28px;
-  }
-
-  .header h1 {
-    font-size: 28px;
-    margin-bottom: 6px;
-  }
-
-  .header p {
-    font-size: 12px;
-  }
-
-  .tabs {
-    padding: 12px;
-    gap: 6px;
-  }
-
-  .tab-button {
-    padding: 10px 12px;
-    font-size: 12px;
-    gap: 6px;
-  }
-
-  .tab-button i {
-    font-size: 14px;
-  }
-
-  .form-container {
-    padding: 16px;
-  }
-
-  .form-grid {
-    gap: 12px;
-  }
-
-  .form-group label {
-    font-size: 13px;
-  }
-
-  .input-wrapper input {
-    padding: 11px 11px 11px 36px;
-    font-size: 14px;
-  }
-
-  .input-wrapper i {
-    left: 10px;
-    font-size: 14px;
-  }
-
-  .section-header {
-    gap: 12px;
-    padding-bottom: 12px;
-  }
-
-  .section-icon {
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
-  }
-
-  .section-header h3 {
-    font-size: 16px;
-  }
-
-  .section-header p {
-    font-size: 11px;
-  }
-
-  .submit-button {
-    padding: 11px 16px;
     font-size: 14px;
     gap: 8px;
   }
 
+  .section-header {
+    gap: 14px;
+    padding-bottom: 18px;
+  }
+
+  .section-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+  }
+
+  .section-header h3 {
+    font-size: 20px;
+  }
+
+  .section-header p {
+    font-size: 13px;
+  }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 480px) {
+  html {
+    font-size: 18px;
+  }
+
+  .app-container {
+    padding: 0;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .background-blur {
+    display: none;
+  }
+
+  body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+  }
+
+  .app-content {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .card-wrapper {
+    gap: 20px;
+    width: 100%;
+  }
+
+  .header {
+    margin-bottom: 16px;
+    padding: 20px 16px 0;
+    width: 100%;
+  }
+
+  .icon-badge {
+    width: 88px;
+    height: 88px;
+    margin: 0 auto 22px;
+    font-size: 44px;
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+  }
+
+  .header h1 {
+    font-size: 36px;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+
+  .header p {
+    font-size: 15px;
+    color: #64748b;
+  }
+
+  .main-card {
+    border-radius: 24px;
+    width: 100%;
+    margin: 0;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .tabs {
+    padding: 22px;
+    gap: 12px;
+    border-bottom: 2px solid #f1f5f9;
+    background: #f8fafc;
+  }
+
+  .tab-button {
+    flex: 1;
+    padding: 18px 14px;
+    font-size: 15px;
+    border-radius: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 52px;
+  }
+
+  .tab-button span {
+    display: none;
+  }
+
+  .tab-button i {
+    font-size: 22px;
+  }
+
+  .tab-button.active i {
+    font-size: 24px;
+  }
+
+  .form-container {
+    padding: 32px 20px;
+    width: 100%;
+  }
+
+  .form-section {
+    gap: 30px;
+    width: 100%;
+  }
+
+  .section-header {
+    gap: 16px;
+    padding-bottom: 22px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .section-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 28px;
+    border-radius: 14px;
+    flex-shrink: 0;
+  }
+
+  .section-header h3 {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .section-header p {
+    font-size: 14px;
+    color: #64748b;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    width: 100%;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .form-group label {
+    font-size: 17px;
+    font-weight: 600;
+    color: #1a202c;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .form-group i {
+    font-size: 19px;
+    color: #3b82f6;
+  }
+
+  .input-wrapper {
+    position: relative;
+  }
+
+  .input-wrapper input {
+    width: 100%;
+    padding: 18px 16px 18px 48px;
+    font-size: 18px;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    background: #f8fafc;
+    color: #1a202c;
+    transition: all 0.3s ease;
+    font-weight: 500;
+  }
+
+  .input-wrapper input:hover {
+    border-color: #cbd5e1;
+    background: white;
+  }
+
+  .input-wrapper input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .input-wrapper input::placeholder {
+    color: #94a3b8;
+  }
+
+  .input-wrapper i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    font-size: 19px;
+    pointer-events: none;
+  }
+
+  .submit-button {
+    width: 100%;
+    padding: 20px 24px;
+    font-size: 18px;
+    font-weight: 700;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 60px;
+    margin-top: 14px;
+  }
+
   .submit-button i {
+    font-size: 22px;
+  }
+
+  .submit-button:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  .success-message,
+  .error-message {
+    padding: 30px 20px;
+    border-radius: 18px;
+    margin-top: 26px;
+    width: 100%;
+  }
+
+  .message-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .message-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 30px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .message-text h3 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .message-text p {
     font-size: 16px;
+    line-height: 1.6;
   }
 
   .download-btn {
-    padding: 9px 12px;
-    font-size: 13px;
-    gap: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 20px;
+    font-size: 17px;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 52px;
+    width: 100%;
+    margin-top: 14px;
   }
 
   .download-btn i {
-    font-size: 14px;
+    font-size: 20px;
   }
 
   .footer {
-    padding: 12px;
-    font-size: 12px;
-    gap: 6px;
+    padding: 24px 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 22px;
+    border-top: 1px solid #e2e8f0;
+    width: 100%;
   }
 
   .footer i {
-    font-size: 16px;
+    font-size: 18px;
+    color: #3b82f6;
   }
 }
