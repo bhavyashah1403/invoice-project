@@ -6,12 +6,64 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("patient");
+  const [errors, setErrors] = useState({});
 
-  const change = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const validateEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!form.customer_name?.trim()) {
+      newErrors.customer_name = "Patient name is required";
+    }
+    if (!form.email?.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!validateEmail(form.email)) {
+      newErrors.email = "Please enter a valid email";
+    }
+    if (!form.number) {
+      newErrors.number = "Invoice number is required";
+    }
+    if (!form.amount) {
+      newErrors.amount = "Amount is required";
+    } else if (form.amount <= 0) {
+      newErrors.amount = "Amount must be greater than 0";
+    }
+    if (!form.amount_in_digit?.trim()) {
+      newErrors.amount_in_digit = "Amount in words is required";
+    }
+    if (!form.mode_of_payment?.trim()) {
+      newErrors.mode_of_payment = "Mode of payment is required";
+    }
+    if (!form.purpose?.trim()) {
+      newErrors.purpose = "Purpose is required";
+    }
+    if (!form.bank_name?.trim()) {
+      newErrors.bank_name = "Bank name is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const change = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: "" });
+    }
+  };
 
   const submit = async (e) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
     setResult(null);
 
@@ -76,8 +128,7 @@ export default function App() {
             {/* Form */}
             <form onSubmit={submit} className="form-container">
               {/* Patient Section */}
-              {activeTab === "patient" && (
-                <div className="form-section fade-in">
+              <div className={`form-section ${activeTab === "patient" ? "active" : "hidden"}`}>
                   <div className="section-header">
                     <div className="section-icon patient">
                       <i className="bi bi-person-check"></i>
@@ -90,53 +141,54 @@ export default function App() {
 
                   <div className="form-grid">
                     <div className="form-group full-width">
-                      <label>Patient Name</label>
+                      <label>Patient Name {errors.customer_name && <span className="error-text">- {errors.customer_name}</span>}</label>
                       <div className="input-wrapper">
                         <i className="bi bi-person"></i>
                         <input
                           name="customer_name"
                           type="text"
-                          required
+                          value={form.customer_name || ""}
                           onChange={change}
                           placeholder="Enter patient name"
+                          className={errors.customer_name ? "error-input" : ""}
                         />
                       </div>
                     </div>
 
                     <div className="form-group">
-                      <label>Patient Email</label>
+                      <label>Patient Email {errors.email && <span className="error-text">- {errors.email}</span>}</label>
                       <div className="input-wrapper">
                         <i className="bi bi-envelope"></i>
                         <input
                           name="email"
                           type="email"
-                          required
+                          value={form.email || ""}
                           onChange={change}
                           placeholder="Enter email"
+                          className={errors.email ? "error-input" : ""}
                         />
                       </div>
                     </div>
 
                     <div className="form-group">
-                      <label>Invoice Number</label>
+                      <label>Invoice Number {errors.number && <span className="error-text">- {errors.number}</span>}</label>
                       <div className="input-wrapper">
                         <i className="bi bi-hash"></i>
                         <input
                           name="number"
                           type="number"
-                          required
+                          value={form.number || ""}
                           onChange={change}
                           placeholder="Invoice #"
+                          className={errors.number ? "error-input" : ""}
                         />
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
+              </div>
 
               {/* Payment Section */}
-              {activeTab === "payment" && (
-                <div className="form-section fade-in">
+              <div className={`form-section ${activeTab === "payment" ? "active" : "hidden"}`}>
                   <div className="section-header">
                     <div className="section-icon payment">
                       <i className="bi bi-credit-card"></i>
@@ -149,77 +201,81 @@ export default function App() {
 
                   <div className="form-grid">
                     <div className="form-group">
-                      <label>Amount</label>
+                      <label>Amount {errors.amount && <span className="error-text">- {errors.amount}</span>}</label>
                       <div className="input-wrapper">
                         <i className="bi bi-currency-rupee"></i>
                         <input
                           name="amount"
                           type="number"
-                          required
+                          value={form.amount || ""}
                           onChange={change}
                           placeholder="Enter amount"
+                          className={errors.amount ? "error-input" : ""}
                         />
                       </div>
                     </div>
 
                     <div className="form-group">
-                      <label>Amount in Words</label>
+                      <label>Amount in Words {errors.amount_in_digit && <span className="error-text">- {errors.amount_in_digit}</span>}</label>
                       <div className="input-wrapper">
                         <i className="bi bi-pencil"></i>
                         <input
                           name="amount_in_digit"
                           type="text"
-                          required
+                          value={form.amount_in_digit || ""}
                           onChange={change}
                           placeholder="e.g., Two Hundred Fifty"
+                          className={errors.amount_in_digit ? "error-input" : ""}
                         />
                       </div>
                     </div>
 
                     <div className="form-group full-width">
-                      <label>Mode of Payment</label>
+                      <label>Mode of Payment {errors.mode_of_payment && <span className="error-text">- {errors.mode_of_payment}</span>}</label>
                       <div className="input-wrapper">
                         <i className="bi bi-wallet2"></i>
                         <input
                           name="mode_of_payment"
                           type="text"
-                          required
+                          value={form.mode_of_payment || ""}
                           onChange={change}
                           placeholder="e.g., Cash, Check, UPI"
+                          className={errors.mode_of_payment ? "error-input" : ""}
                         />
                       </div>
                     </div>
 
                     <div className="form-group full-width">
-                      <label>Purpose</label>
+                      <label>Purpose {errors.purpose && <span className="error-text">- {errors.purpose}</span>}</label>
                       <div className="input-wrapper">
                         <i className="bi bi-clipboard"></i>
                         <input
                           name="purpose"
                           type="text"
-                          required
+                          value={form.purpose || ""}
                           onChange={change}
                           placeholder="e.g., Medical Consultation"
+                          className={errors.purpose ? "error-input" : ""}
                         />
                       </div>
                     </div>
 
                     <div className="form-group">
-                      <label>Bank Name</label>
+                      <label>Bank Name {errors.bank_name && <span className="error-text">- {errors.bank_name}</span>}</label>
                       <div className="input-wrapper">
                         <i className="bi bi-bank"></i>
                         <input
                           name="bank_name"
                           type="text"
-                          required
+                          value={form.bank_name || ""}
                           onChange={change}
                           placeholder="Enter bank name"
+                          className={errors.bank_name ? "error-input" : ""}
                         />
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
+              </div>
 
               {/* Submit Button */}
               <button type="submit" disabled={loading} className="submit-button">
