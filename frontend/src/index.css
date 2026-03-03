@@ -4,10 +4,6 @@
   box-sizing: border-box;
 }
 
-html {
-  font-size: 16px;
-}
-
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 50%, #dfe7ef 100%);
@@ -15,13 +11,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  -webkit-text-size-adjust: 100%;
 }
 
 #root {
   width: 100%;
   height: 100%;
-  display: flex;
 }
 
 /* App Container */
@@ -258,21 +252,6 @@ body {
 }
 
 /* Form Grid */
-.form-section {
-  display: none;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.form-section.active {
-  display: block;
-  opacity: 1;
-}
-
-.form-section.hidden {
-  display: none;
-}
-
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -577,28 +556,9 @@ body {
     gap: 10px;
   }
 
-.form-group label {
-  font-size: 15px;
-  font-weight: 600;
-  color: #1a202c;
-  margin-bottom: 8px;
-  display: block;
-}
-
-.error-text {
-  color: #ef4444;
-  font-weight: 600;
-  font-size: 13px;
-}
-
-.error-input {
-  border-color: #ef4444 !important;
-  background-color: #fef2f2 !important;
-}
-
-.error-input:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
-}
+  .form-group label {
+    font-size: 15px;
+  }
 
   .form-group.full-width {
     grid-column: 1;
