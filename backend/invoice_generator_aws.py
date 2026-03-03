@@ -68,42 +68,23 @@ class InvoiceGenerator:
             Params={"Bucket": self.S3_BUCKET, "Key": key},
             ExpiresIn=604800
         )
+
     def send_email(self, link, name, email):
-        try:
-            print("----- EMAIL DEBUG START -----")
+        msg = MIMEMultipart()
+        msg["From"] = os.getenv("EMAIL_USER")
+        msg["To"] = email
+        msg["Subject"] = "Your Invoice"
 
-            user = os.getenv("EMAIL_USER")
-            password = os.getenv("EMAIL_PASS")
+        msg.attach(MIMEText(
+            f"Hello {name},\n\nYour invoice:\n{link}\n\nExpires in 7 days.",
+            "plain"
+        ))
 
-            print("EMAIL_USER:", user)
-            print("EMAIL_PASS exists:", bool(password))
-            print("Sending to:", email)
-
-            msg = MIMEMultipart()
-            msg["From"] = user
-            msg["To"] = email
-            msg["Subject"] = "Your Invoice"
-
-            msg.attach(MIMEText(
-                f"Hello {name},\n\nYour invoice:\n{link}\n\nExpires in 7 days.",
-                "plain"
-            ))
-
-            print("Connecting to SMTP...")
-            server = smtplib.SMTP("smtp.gmail.com", 587, timeout=10)
-            server.set_debuglevel(1)  # 🔥 VERY IMPORTANT
-            server.starttls()
-
-            print("Logging in...")
-            server.login(user, password)
-
-            print("Sending email...")
-            server.send_message(msg)
-
-            server.quit()
-
-            print("Email sent successfully")
-            print("----- EMAIL DEBUG END -----")
-
-        except Exception as e:
-            print("EMAIL ERROR:", repr(e))
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(
+            os.getenv("EMAIL_USER"),
+            os.getenv("EMAIL_PASS")
+        )
+        server.send_message(msg)
+        server.quit()
