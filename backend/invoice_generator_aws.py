@@ -6,6 +6,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+
 class InvoiceGenerator:
     def __init__(self, template_file):
         self.template_file = template_file
@@ -21,27 +22,39 @@ class InvoiceGenerator:
         )
 
     def generate_invoice(self, data):
+        # 🔑 WRITE TO /tmp (REQUIRED ON RENDER)
+        safe_name = data["customer_name"].replace(" ", "_")
+        filename = f"/tmp/{safe_name}_{datetime.date.today()}.pdf"
+
+        # Get PDF fields
         fields = list(fillpdfs.get_form_fields(self.template_file).keys())
-        filename = f"{data['customer_name']}_{datetime.date.today()}.pdf"
 
-        fillpdfs.write_fillable_pdf(self.template_file, filename, {
-            fields[0]: data['number'],
-            fields[1]: datetime.date.today().strftime('%Y-%m-%d'),
-            fields[2]: data['customer_name'],
-            fields[3]: data['amount'],
-            fields[4]: data['mode_of_payment'],
-            fields[5]: data['purpose'],
-            fields[6]: data['bank_name'],
-            fields[7]: data['amount_in_digit']
-        })
+        # Fill PDF
+        fillpdfs.write_fillable_pdf(
+            self.template_file,
+            filename,
+            {
+                fields[0]: data["number"],
+                fields[1]: datetime.date.today().strftime("%Y-%m-%d"),
+                fields[2]: data["customer_name"],
+                fields[3]: data["amount"],
+                fields[4]: data["mode_of_payment"],
+                fields[5]: data["purpose"],
+                fields[6]: data["bank_name"],
+                fields[7]: data["amount_in_digit"],
+            }
+        )
 
-        link = self.upload_to_s3(filename, data['customer_name'])
-        self.send_email(link, data['customer_name'], data['email'])
+        # Upload to S3
+        link = self.upload_to_s3(filename, safe_name)
+
+        # Send Email
+        self.send_email(link, data["customer_name"], data["email"])
 
         return link
 
     def upload_to_s3(self, file_path, customer):
-        key = f"invoices/{customer}/{file_path}"
+        key = f"invoices/{customer}/{os.path.basename(file_path)}"
 
         self.s3.upload_file(
             file_path,
