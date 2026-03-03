@@ -2,9 +2,8 @@ import os
 import datetime
 import boto3
 from fillpdf import fillpdfs
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 
 class InvoiceGenerator:
@@ -70,21 +69,17 @@ class InvoiceGenerator:
         )
 
     def send_email(self, link, name, email):
-        msg = MIMEMultipart()
-        msg["From"] = os.getenv("EMAIL_USER")
-        msg["To"] = email
-        msg["Subject"] = "Your Invoice"
-
-        msg.attach(MIMEText(
-            f"Hello {name},\n\nYour invoice:\n{link}\n\nExpires in 7 days.",
-            "plain"
-        ))
-
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
-        server.login(
-            os.getenv("EMAIL_USER"),
-            os.getenv("EMAIL_PASS")
-        )
-        server.send_message(msg)
-        server.quit()
+        try:
+            sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
+            
+            message = Mail(
+                from_email=os.getenv("FROM_EMAIL"),
+                to_emails=email,
+                subject="Your Invoice",
+                plain_text_content=f"Hello {name},\n\nYour invoice:\n{link}\n\nExpires in 7 days."
+            )
+            
+            sg.send(message)
+            print(f"[v0] Email sent successfully to {email}")
+        except Exception as e:
+            print(f"[v0] Email send failed: {str(e)}")

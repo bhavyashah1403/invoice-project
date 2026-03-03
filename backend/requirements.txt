@@ -4,3 +4,4 @@ gunicorn
 boto3
 fillpdf==0.7.3
 python-dotenv
+sendgrid
