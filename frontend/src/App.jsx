@@ -24,8 +24,18 @@ export default function App() {
       }
     );
 
-    setResult(await res.json());
+    const data = await res.json();
+    setResult(data);
     setLoading(false);
+    
+    // Clear form only after successful invoice generation
+    if (data.success) {
+      setTimeout(() => {
+        setForm({});
+        setResult(null);
+        setActiveTab("patient");
+      }, 3000);
+    }
   };
 
   return (
