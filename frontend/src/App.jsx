@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./index.css";
+import { numberToWords } from "./utils/numberToWords";
 
 export default function App() {
   const [form, setForm] = useState({});
@@ -50,7 +51,14 @@ export default function App() {
 
   const change = (e) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    const updatedForm = { ...form, [name]: value };
+    
+    // Auto-convert amount to words when amount field changes
+    if (name === "amount" && value) {
+      updatedForm.amount_in_digit = numberToWords(value);
+    }
+    
+    setForm(updatedForm);
     // Clear error for this field when user starts typing
     if (errors[name]) {
       setErrors({ ...errors, [name]: "" });
