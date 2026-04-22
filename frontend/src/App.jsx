@@ -86,10 +86,12 @@ export default function App() {
     setLoading(true);
     setResult(null);
 
-    // Combine title with customer name
-    const formData = {
+    // Combine title with customer name for invoice display
+    // But send original name to backend for S3 storage
+    const invoiceData = {
       ...form,
-      customer_name: `${form.title} ${form.customer_name}`
+      customer_name: `${form.title} ${form.customer_name}`,
+      patient_name_only: form.customer_name // Store the original name without title
     };
 
     const res = await fetch(
@@ -97,7 +99,7 @@ export default function App() {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(invoiceData),
       }
     );
 
@@ -168,7 +170,6 @@ export default function App() {
                     <div className="form-group">
                       <label>Title {errors.title && <span className="error-text">- {errors.title}</span>}</label>
                       <div className="input-wrapper">
-                        <i className="bi bi-person-badge"></i>
                         <select
                           name="title"
                           value={form.title || ""}
