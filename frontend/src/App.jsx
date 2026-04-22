@@ -1,7 +1,8 @@
 import { useState } from "react";
 import "./index.css";
 import { numberToWords } from "./utils/numberToWords";
-import { paymentModes, purposes, indianBanks } from "./utils/dropdownData";
+import { capitalizeFirstAndLastName } from "./utils/capitalizeNames";
+import { titles, paymentModes, purposes, indianBanks } from "./utils/dropdownData";
 import { SearchableDropdown } from "./components/SearchableDropdown";
 
 export default function App() {
@@ -18,6 +19,9 @@ export default function App() {
   const validateForm = () => {
     const newErrors = {};
 
+    if (!form.title?.trim()) {
+      newErrors.title = "Title is required";
+    }
     if (!form.customer_name?.trim()) {
       newErrors.customer_name = "Patient name is required";
     }
@@ -55,6 +59,11 @@ export default function App() {
     const { name, value } = e.target;
     const updatedForm = { ...form, [name]: value };
     
+    // Auto-capitalize first and last letter of patient name
+    if (name === "customer_name" && value) {
+      updatedForm.customer_name = capitalizeFirstAndLastName(value);
+    }
+    
     // Auto-convert amount to words when amount field changes
     if (name === "amount" && value) {
       updatedForm.amount_in_digit = numberToWords(value);
@@ -77,12 +86,18 @@ export default function App() {
     setLoading(true);
     setResult(null);
 
+    // Combine title with customer name
+    const formData = {
+      ...form,
+      customer_name: `${form.title} ${form.customer_name}`
+    };
+
     const res = await fetch(
       "https://invoice-project-muxg.onrender.com/api/generate-invoice",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(formData),
       }
     );
 
@@ -150,7 +165,27 @@ export default function App() {
                   </div>
 
                   <div className="form-grid">
-                    <div className="form-group full-width">
+                    <div className="form-group">
+                      <label>Title {errors.title && <span className="error-text">- {errors.title}</span>}</label>
+                      <div className="input-wrapper">
+                        <i className="bi bi-person-badge"></i>
+                        <select
+                          name="title"
+                          value={form.title || ""}
+                          onChange={change}
+                          className={errors.title ? "error-input" : ""}
+                        >
+                          <option value="">Select title</option>
+                          {titles.map((t) => (
+                            <option key={t} value={t}>
+                              {t}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="form-group">
                       <label>Patient Name {errors.customer_name && <span className="error-text">- {errors.customer_name}</span>}</label>
                       <div className="input-wrapper">
                         <i className="bi bi-person"></i>
