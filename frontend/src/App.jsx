@@ -135,7 +135,7 @@ export default function App() {
                     </div>
                     <div>
                       <h3>Patient Details</h3>
-                      <p>Enter patient information</p>
+                      <p>Enter patient informationnn</p>
                     </div>
                   </div>
 
