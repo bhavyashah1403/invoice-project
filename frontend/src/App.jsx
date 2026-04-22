@@ -1,6 +1,8 @@
 import { useState } from "react";
 import "./index.css";
 import { numberToWords } from "./utils/numberToWords";
+import { paymentModes, purposes, indianBanks } from "./utils/dropdownData";
+import { SearchableDropdown } from "./components/SearchableDropdown";
 
 export default function App() {
   const [form, setForm] = useState({});
@@ -238,50 +240,38 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="form-group full-width">
-                      <label>Mode of Payment {errors.mode_of_payment && <span className="error-text">- {errors.mode_of_payment}</span>}</label>
-                      <div className="input-wrapper">
-                        <i className="bi bi-wallet2"></i>
-                        <input
-                          name="mode_of_payment"
-                          type="text"
-                          value={form.mode_of_payment || ""}
-                          onChange={change}
-                          placeholder="e.g., Cash, Check, UPI"
-                          className={errors.mode_of_payment ? "error-input" : ""}
-                        />
-                      </div>
-                    </div>
+                    <SearchableDropdown
+                      name="mode_of_payment"
+                      label={`Mode of Payment ${errors.mode_of_payment ? `- ${errors.mode_of_payment}` : ""}`}
+                      value={form.mode_of_payment || ""}
+                      onChange={change}
+                      options={paymentModes}
+                      placeholder="Select payment mode"
+                      icon="wallet2"
+                      error={errors.mode_of_payment}
+                    />
 
-                    <div className="form-group full-width">
-                      <label>Purpose {errors.purpose && <span className="error-text">- {errors.purpose}</span>}</label>
-                      <div className="input-wrapper">
-                        <i className="bi bi-clipboard"></i>
-                        <input
-                          name="purpose"
-                          type="text"
-                          value={form.purpose || ""}
-                          onChange={change}
-                          placeholder="e.g., Medical Consultation"
-                          className={errors.purpose ? "error-input" : ""}
-                        />
-                      </div>
-                    </div>
+                    <SearchableDropdown
+                      name="purpose"
+                      label={`Purpose ${errors.purpose ? `- ${errors.purpose}` : ""}`}
+                      value={form.purpose || ""}
+                      onChange={change}
+                      options={purposes}
+                      placeholder="Select purpose"
+                      icon="clipboard"
+                      error={errors.purpose}
+                    />
 
-                    <div className="form-group">
-                      <label>Bank Name {errors.bank_name && <span className="error-text">- {errors.bank_name}</span>}</label>
-                      <div className="input-wrapper">
-                        <i className="bi bi-bank"></i>
-                        <input
-                          name="bank_name"
-                          type="text"
-                          value={form.bank_name || ""}
-                          onChange={change}
-                          placeholder="Enter bank name"
-                          className={errors.bank_name ? "error-input" : ""}
-                        />
-                      </div>
-                    </div>
+                    <SearchableDropdown
+                      name="bank_name"
+                      label={`Bank Name ${errors.bank_name ? `- ${errors.bank_name}` : ""}`}
+                      value={form.bank_name || ""}
+                      onChange={change}
+                      options={indianBanks}
+                      placeholder="Search and select bank"
+                      icon="bank"
+                      error={errors.bank_name}
+                    />
                   </div>
               </div>
 

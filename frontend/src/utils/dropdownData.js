@@ -1,0 +1,42 @@
+export const paymentModes = ["CASH", "CHEQUE", "UPI"];
+
+export const purposes = ["First time", "Regular check UP", "Emergency"];
+
+export const indianBanks = [
+  "Axis Bank",
+  "Bandhan Bank",
+  "Bank of Baroda",
+  "Bank of India",
+  "Bank of Maharashtra",
+  "HDFC Bank",
+  "ICICI Bank",
+  "IDBI Bank",
+  "Indian Bank",
+  "Indian Overseas Bank",
+  "Indusind Bank",
+  "Kotak Mahindra Bank",
+  "PNB (Punjab National Bank)",
+  "RBL Bank",
+  "SBI (State Bank of India)",
+  "Canara Bank",
+  "Central Bank of India",
+  "Federal Bank",
+  "IDFCFIRST Bank",
+  "Yes Bank",
+  "Airtel Payments Bank",
+  "Fino Payments Bank",
+  "ICICI Prudential Bank",
+  "Jharkhand Gramin Bank",
+  "Karnataka Bank",
+  "Karur Vysya Bank",
+  "Lakshmi Vilas Bank",
+  "Madhya Pradesh Gramin Bank",
+  "Nainital Bank",
+  "Rabobank",
+  "South Indian Bank",
+  "Standard Chartered Bank",
+  "Tamilnad Mercantile Bank",
+  "The Saraswat Bank",
+  "Utkarsh Small Finance Bank",
+  "Uttarakhand Gramin Bank"
+];
