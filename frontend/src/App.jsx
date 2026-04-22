@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./index.css";
 import { numberToWords } from "./utils/numberToWords";
+import { capitalizeFirstAndLastName } from "./utils/capitalizeNames";
 import { paymentModes, purposes, indianBanks } from "./utils/dropdownData";
 import { SearchableDropdown } from "./components/SearchableDropdown";
 
@@ -54,6 +55,11 @@ export default function App() {
   const change = (e) => {
     const { name, value } = e.target;
     const updatedForm = { ...form, [name]: value };
+    
+    // Auto-capitalize first and last letter of patient name
+    if (name === "customer_name" && value) {
+      updatedForm.customer_name = capitalizeFirstAndLastName(value);
+    }
     
     // Auto-convert amount to words when amount field changes
     if (name === "amount" && value) {
