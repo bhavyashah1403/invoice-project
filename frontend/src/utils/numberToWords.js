@@ -18,7 +18,7 @@ const ones = [
 
 const teens = [
   "Ten",
-  "Eleven",
+  "Elevenn",
   "Twelve",
   "Thirteen",
   "Fourteen",
