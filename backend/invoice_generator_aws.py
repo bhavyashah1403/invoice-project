@@ -76,9 +76,16 @@ class InvoiceGenerator:
                 from_email=os.getenv("FROM_EMAIL"),
                 to_emails=email,
                 subject="Your Invoice",
-                plain_text_content=f"Hello {name},\n\nYour invoice from T2T Hormone Clinics:\n{link}\n\nExpires in 7 days."
+                html_content=f"""
+                <p>Hello {name},</p>
+
+                <p>Your invoice from T2T Hormone Clinics:</p>
+
+                <p><a href="{link}">View Invoice</a></p>
+
+                <p>Expires in 7 days.</p>
+                """
             )
-            
             sg.send(message)
             print(f"Email sent successfully to {email}")
         except Exception as e:
