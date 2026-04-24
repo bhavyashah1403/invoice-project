@@ -9,6 +9,7 @@ export function SearchableDropdown({
   label,
   icon,
   error,
+  disabled = false,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -29,6 +30,14 @@ export function SearchableDropdown({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Close dropdown if disabled while open
+  useEffect(() => {
+    if (disabled) {
+      setIsOpen(false);
+      setSearchTerm("");
+    }
+  }, [disabled]);
+
   const handleSelect = (option) => {
     onChange({ target: { name, value: option } });
     setIsOpen(false);
@@ -36,6 +45,7 @@ export function SearchableDropdown({
   };
 
   const handleOpen = () => {
+    if (disabled) return;
     setIsOpen(true);
     setSearchTerm("");
   };
@@ -46,19 +56,16 @@ export function SearchableDropdown({
       ref={dropdownRef}
       style={{ position: "relative" }}
     >
-      {/* Label */}
       <label>{label}</label>
 
-      {/* Trigger row */}
       <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-        {/* Leading icon */}
         {icon && (
           <i
             className={`bi bi-${icon}`}
             style={{
               position: "absolute",
               left: "13px",
-              color: "#94a3b8",
+              color: disabled ? "#cbd5e1" : "#94a3b8",
               fontSize: "15px",
               pointerEvents: "none",
               zIndex: 1,
@@ -66,36 +73,41 @@ export function SearchableDropdown({
           />
         )}
 
-        {/* Text input */}
         <input
           type="text"
           autoComplete="off"
-          placeholder={isOpen ? "Search…" : (value || placeholder)}
-          value={isOpen ? searchTerm : (value || "")}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder={disabled ? "N/A — Cash selected" : (isOpen ? "Search…" : (value || placeholder))}
+          value={disabled ? "NA" : (isOpen ? searchTerm : (value || ""))}
+          onChange={(e) => {
+            if (disabled) return;
+            setSearchTerm(e.target.value);
+          }}
           onFocus={handleOpen}
-          readOnly={!isOpen}
+          readOnly={disabled || !isOpen}
           className={`dropdown-input${error ? " error-input" : ""}`}
           style={{
             paddingLeft: icon ? "38px" : "13px",
             paddingRight: "36px",
-            cursor: isOpen ? "text" : "pointer",
+            cursor: disabled ? "not-allowed" : (isOpen ? "text" : "pointer"),
+            opacity: disabled ? 0.55 : 1,
+            background: disabled ? "#f8fafc" : undefined,
+            color: disabled ? "#94a3b8" : undefined,
           }}
         />
 
-        {/* Chevron */}
         <i
           className="bi bi-chevron-down"
           onMouseDown={(e) => {
+            if (disabled) return;
             e.preventDefault();
             isOpen ? (setIsOpen(false), setSearchTerm("")) : handleOpen();
           }}
           style={{
             position: "absolute",
             right: "12px",
-            color: isOpen ? "#3b82f6" : "#94a3b8",
+            color: disabled ? "#cbd5e1" : (isOpen ? "#3b82f6" : "#94a3b8"),
             fontSize: "13px",
-            cursor: "pointer",
+            cursor: disabled ? "not-allowed" : "pointer",
             transition: "transform 0.2s ease, color 0.2s ease",
             transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
             userSelect: "none",
@@ -103,8 +115,7 @@ export function SearchableDropdown({
         />
       </div>
 
-      {/* Dropdown menu */}
-      {isOpen && (
+      {isOpen && !disabled && (
         <div
           style={{
             position: "absolute",
@@ -177,7 +188,6 @@ export function SearchableDropdown({
         </div>
       )}
 
-      {/* Inline error below input */}
       {error && (
         <span
           className="error-text"
