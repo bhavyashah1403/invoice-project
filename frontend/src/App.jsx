@@ -19,34 +19,75 @@ export default function App() {
   const validateForm = () => {
     const newErrors = {};
 
+    // Title
     if (!form.title?.trim()) {
       newErrors.title = "Title is required";
     }
+
+    // Patient Name — letters, spaces, dots, hyphens only; 2–60 chars
     if (!form.customer_name?.trim()) {
       newErrors.customer_name = "Patient name is required";
+    } else if (form.customer_name.trim().length < 2) {
+      newErrors.customer_name = "Name must be at least 2 characters";
+    } else if (form.customer_name.trim().length > 60) {
+      newErrors.customer_name = "Name must be under 60 characters";
+    } else if (!/^[a-zA-Z\s.\-']+$/.test(form.customer_name.trim())) {
+      newErrors.customer_name = "Name can only contain letters, spaces, dots, or hyphens";
     }
+
+    // Email
     if (!form.email?.trim()) {
       newErrors.email = "Email is required";
-    } else if (!validateEmail(form.email)) {
-      newErrors.email = "Please enter a valid email";
+    } else if (!validateEmail(form.email.trim())) {
+      newErrors.email = "Please enter a valid email (e.g. name@example.com)";
+    } else if (form.email.trim().length > 100) {
+      newErrors.email = "Email must be under 100 characters";
     }
-    if (!form.number) {
+
+    // Invoice Number — positive integer, max 6 digits
+    if (!form.number && form.number !== 0) {
       newErrors.number = "Invoice number is required";
+    } else if (!Number.isInteger(Number(form.number))) {
+      newErrors.number = "Invoice number must be a whole number";
+    } else if (Number(form.number) <= 0) {
+      newErrors.number = "Invoice number must be greater than 0";
+    } else if (Number(form.number) > 999999) {
+      newErrors.number = "Invoice number cannot exceed 999999";
     }
-    if (!form.amount) {
+
+    // Amount — positive, max ₹10,00,000, max 2 decimal places
+    if (!form.amount && form.amount !== 0) {
       newErrors.amount = "Amount is required";
-    } else if (form.amount <= 0) {
-      newErrors.amount = "Amount must be greater than 0";
+    } else if (isNaN(Number(form.amount))) {
+      newErrors.amount = "Amount must be a valid number";
+    } else if (Number(form.amount) <= 0) {
+      newErrors.amount = "Amount must be greater than ₹0";
+    } else if (Number(form.amount) > 1000000) {
+      newErrors.amount = "Amount cannot exceed ₹10,00,000";
+    } else if (!/^\d+(\.\d{1,2})?$/.test(String(form.amount))) {
+      newErrors.amount = "Amount can have at most 2 decimal places";
     }
+
+    // Amount in Words — auto-filled but still validated
     if (!form.amount_in_digit?.trim()) {
       newErrors.amount_in_digit = "Amount in words is required";
+    } else if (form.amount_in_digit.trim().length < 3) {
+      newErrors.amount_in_digit = "Amount in words seems too short";
+    } else if (!/^[a-zA-Z\s,]+$/.test(form.amount_in_digit.trim())) {
+      newErrors.amount_in_digit = "Amount in words should only contain letters";
     }
+
+    // Mode of Payment
     if (!form.mode_of_payment?.trim()) {
       newErrors.mode_of_payment = "Mode of payment is required";
     }
+
+    // Purpose
     if (!form.purpose?.trim()) {
       newErrors.purpose = "Purpose is required";
     }
+
+    // Bank Name
     if (!form.bank_name?.trim()) {
       newErrors.bank_name = "Bank name is required";
     }
@@ -58,19 +99,17 @@ export default function App() {
   const change = (e) => {
     const { name, value } = e.target;
     const updatedForm = { ...form, [name]: value };
-    
-    // Auto-capitalize first and last letter of patient name
+
     if (name === "customer_name" && value) {
       updatedForm.customer_name = capitalizeFirstAndLastName(value);
     }
-    
-    // Auto-convert amount to words when amount field changes
+
     if (name === "amount" && value) {
       updatedForm.amount_in_digit = numberToWords(value);
     }
-    
+
     setForm(updatedForm);
-    // Clear error for this field when user starts typing
+
     if (errors[name]) {
       setErrors({ ...errors, [name]: "" });
     }
@@ -78,20 +117,22 @@ export default function App() {
 
   const submit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
+      // Switch to the tab that has errors
+      const patientFields = ["title", "customer_name", "email", "number"];
+      const hasPatientErrors = patientFields.some((f) => errors[f]);
+      if (hasPatientErrors) setActiveTab("patient");
       return;
     }
 
     setLoading(true);
     setResult(null);
 
-    // Combine title with customer name for invoice display
-    // But send original name to backend for S3 storage
     const invoiceData = {
       ...form,
       customer_name: `${form.title} ${form.customer_name}`,
-      patient_name_only: form.customer_name // Store the original name without title
+      patient_name_only: form.customer_name,
     };
 
     const res = await fetch(
@@ -106,8 +147,7 @@ export default function App() {
     const data = await res.json();
     setResult(data);
     setLoading(false);
-    
-    // Clear form only after successful invoice generation
+
     if (data.success) {
       setTimeout(() => {
         setForm({});
@@ -120,7 +160,7 @@ export default function App() {
   return (
     <div className="app-container">
       <div className="background-blur"></div>
-      
+
       <div className="app-content">
         <div className="card-wrapper">
           {/* Header */}
@@ -156,159 +196,162 @@ export default function App() {
             <form onSubmit={submit} className="form-container">
               {/* Patient Section */}
               <div className={`form-section ${activeTab === "patient" ? "active" : "hidden"}`}>
-                  <div className="section-header">
-                    <div className="section-icon patient">
-                      <i className="bi bi-person-check"></i>
-                    </div>
-                    <div>
-                      <h3>Patient Details</h3>
-                      <p>Enter patient informationnn</p>
+                <div className="section-header">
+                  <div className="section-icon patient">
+                    <i className="bi bi-person-check"></i>
+                  </div>
+                  <div>
+                    <h3>Patient Details</h3>
+                    <p>Enter patient information</p>
+                  </div>
+                </div>
+
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>Title {errors.title && <span className="error-text">— {errors.title}</span>}</label>
+                    <div className="input-wrapper">
+                      <select
+                        name="title"
+                        value={form.title || ""}
+                        onChange={change}
+                        className={errors.title ? "error-input" : ""}
+                      >
+                        <option value="">Select title</option>
+                        {titles.map((t) => (
+                          <option key={t} value={t}>{t}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
 
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label>Title {errors.title && <span className="error-text">- {errors.title}</span>}</label>
-                      <div className="input-wrapper">
-                        <select
-                          name="title"
-                          value={form.title || ""}
-                          onChange={change}
-                          className={errors.title ? "error-input" : ""}
-                        >
-                          <option value="">Select title</option>
-                          {titles.map((t) => (
-                            <option key={t} value={t}>
-                              {t}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="form-group">
-                      <label>Patient Name {errors.customer_name && <span className="error-text">- {errors.customer_name}</span>}</label>
-                      <div className="input-wrapper">
-                        <i className="bi bi-person"></i>
-                        <input
-                          name="customer_name"
-                          type="text"
-                          value={form.customer_name || ""}
-                          onChange={change}
-                          placeholder="Enter patient name"
-                          className={errors.customer_name ? "error-input" : ""}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="form-group">
-                      <label>Patient Email {errors.email && <span className="error-text">- {errors.email}</span>}</label>
-                      <div className="input-wrapper">
-                        <i className="bi bi-envelope"></i>
-                        <input
-                          name="email"
-                          type="email"
-                          value={form.email || ""}
-                          onChange={change}
-                          placeholder="Enter email"
-                          className={errors.email ? "error-input" : ""}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="form-group">
-                      <label>Invoice Number {errors.number && <span className="error-text">- {errors.number}</span>}</label>
-                      <div className="input-wrapper">
-                        <i className="bi bi-hash"></i>
-                        <input
-                          name="number"
-                          type="number"
-                          value={form.number || ""}
-                          onChange={change}
-                          placeholder="Invoice #"
-                          className={errors.number ? "error-input" : ""}
-                        />
-                      </div>
+                  <div className="form-group">
+                    <label>Patient Name {errors.customer_name && <span className="error-text">— {errors.customer_name}</span>}</label>
+                    <div className="input-wrapper">
+                      <i className="bi bi-person"></i>
+                      <input
+                        name="customer_name"
+                        type="text"
+                        value={form.customer_name || ""}
+                        onChange={change}
+                        placeholder="Enter patient name"
+                        className={errors.customer_name ? "error-input" : ""}
+                      />
                     </div>
                   </div>
+
+                  <div className="form-group">
+                    <label>Patient Email {errors.email && <span className="error-text">— {errors.email}</span>}</label>
+                    <div className="input-wrapper">
+                      <i className="bi bi-envelope"></i>
+                      <input
+                        name="email"
+                        type="email"
+                        value={form.email || ""}
+                        onChange={change}
+                        placeholder="Enter email"
+                        className={errors.email ? "error-input" : ""}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Invoice Number {errors.number && <span className="error-text">— {errors.number}</span>}</label>
+                    <div className="input-wrapper">
+                      <i className="bi bi-hash"></i>
+                      <input
+                        name="number"
+                        type="number"
+                        value={form.number || ""}
+                        onChange={change}
+                        placeholder="Invoice #"
+                        min="1"
+                        max="999999"
+                        className={errors.number ? "error-input" : ""}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Payment Section */}
               <div className={`form-section ${activeTab === "payment" ? "active" : "hidden"}`}>
-                  <div className="section-header">
-                    <div className="section-icon payment">
-                      <i className="bi bi-credit-card"></i>
-                    </div>
-                    <div>
-                      <h3>Payment Details</h3>
-                      <p>Enter payment information</p>
+                <div className="section-header">
+                  <div className="section-icon payment">
+                    <i className="bi bi-credit-card"></i>
+                  </div>
+                  <div>
+                    <h3>Payment Details</h3>
+                    <p>Enter payment information</p>
+                  </div>
+                </div>
+
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>Amount {errors.amount && <span className="error-text">— {errors.amount}</span>}</label>
+                    <div className="input-wrapper">
+                      <i className="bi bi-currency-rupee"></i>
+                      <input
+                        name="amount"
+                        type="number"
+                        value={form.amount || ""}
+                        onChange={change}
+                        placeholder="Enter amount"
+                        min="1"
+                        max="1000000"
+                        step="0.01"
+                        className={errors.amount ? "error-input" : ""}
+                      />
                     </div>
                   </div>
 
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label>Amount {errors.amount && <span className="error-text">- {errors.amount}</span>}</label>
-                      <div className="input-wrapper">
-                        <i className="bi bi-currency-rupee"></i>
-                        <input
-                          name="amount"
-                          type="number"
-                          value={form.amount || ""}
-                          onChange={change}
-                          placeholder="Enter amount"
-                          className={errors.amount ? "error-input" : ""}
-                        />
-                      </div>
+                  <div className="form-group">
+                    <label>Amount in Words {errors.amount_in_digit && <span className="error-text">— {errors.amount_in_digit}</span>}</label>
+                    <div className="input-wrapper">
+                      <i className="bi bi-pencil"></i>
+                      <input
+                        name="amount_in_digit"
+                        type="text"
+                        value={form.amount_in_digit || ""}
+                        onChange={change}
+                        placeholder="e.g., Two Hundred Fifty"
+                        className={errors.amount_in_digit ? "error-input" : ""}
+                      />
                     </div>
-
-                    <div className="form-group">
-                      <label>Amount in Words {errors.amount_in_digit && <span className="error-text">- {errors.amount_in_digit}</span>}</label>
-                      <div className="input-wrapper">
-                        <i className="bi bi-pencil"></i>
-                        <input
-                          name="amount_in_digit"
-                          type="text"
-                          value={form.amount_in_digit || ""}
-                          onChange={change}
-                          placeholder="e.g., Two Hundred Fifty"
-                          className={errors.amount_in_digit ? "error-input" : ""}
-                        />
-                      </div>
-                    </div>
-
-                    <SearchableDropdown
-                      name="mode_of_payment"
-                      label={`Mode of Payment ${errors.mode_of_payment ? `- ${errors.mode_of_payment}` : ""}`}
-                      value={form.mode_of_payment || ""}
-                      onChange={change}
-                      options={paymentModes}
-                      placeholder="Select payment mode"
-                      icon="wallet2"
-                      error={errors.mode_of_payment}
-                    />
-
-                    <SearchableDropdown
-                      name="purpose"
-                      label={`Purpose ${errors.purpose ? `- ${errors.purpose}` : ""}`}
-                      value={form.purpose || ""}
-                      onChange={change}
-                      options={purposes}
-                      placeholder="Select purpose"
-                      icon="clipboard"
-                      error={errors.purpose}
-                    />
-
-                    <SearchableDropdown
-                      name="bank_name"
-                      label={`Bank Name ${errors.bank_name ? `- ${errors.bank_name}` : ""}`}
-                      value={form.bank_name || ""}
-                      onChange={change}
-                      options={indianBanks}
-                      placeholder="Search and select bank"
-                      icon="bank"
-                      error={errors.bank_name}
-                    />
                   </div>
+
+                  <SearchableDropdown
+                    name="mode_of_payment"
+                    label={`Mode of Payment ${errors.mode_of_payment ? `— ${errors.mode_of_payment}` : ""}`}
+                    value={form.mode_of_payment || ""}
+                    onChange={change}
+                    options={paymentModes}
+                    placeholder="Select payment mode"
+                    icon="wallet2"
+                    error={errors.mode_of_payment}
+                  />
+
+                  <SearchableDropdown
+                    name="purpose"
+                    label={`Purpose ${errors.purpose ? `— ${errors.purpose}` : ""}`}
+                    value={form.purpose || ""}
+                    onChange={change}
+                    options={purposes}
+                    placeholder="Select purpose"
+                    icon="clipboard"
+                    error={errors.purpose}
+                  />
+
+                  <SearchableDropdown
+                    name="bank_name"
+                    label={`Bank Name ${errors.bank_name ? `— ${errors.bank_name}` : ""}`}
+                    value={form.bank_name || ""}
+                    onChange={change}
+                    options={indianBanks}
+                    placeholder="Search and select bank"
+                    icon="bank"
+                    error={errors.bank_name}
+                  />
+                </div>
               </div>
 
               {/* Submit Button */}
